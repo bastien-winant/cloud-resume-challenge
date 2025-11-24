@@ -8,7 +8,7 @@ export default function Layout() {
 		<Container h="200vh">
 			<Header />
 			<Stack
-				position="sticky"
+				position={{ md: "sticky" }}
 				top="0"
 				direction={{ base: "column", md: "row" }}
 				gap={{ md: 12 }}

@@ -10,7 +10,7 @@ export default function Header() {
 			h={{ base: 56, lg: 64 }}
 		>
 			<Stack gap="0">
-				<Heading size={{ base: "xl", lg: "2xl" }}>Bastien Winant,</Heading>
+				<Heading as="h1" size={{ base: "xl", lg: "2xl" }}>Bastien Winant,</Heading>
 				<Text textStyle={{ base: "xl", lg: "2xl" }} color="fg.muted">Data Engineer</Text>
 			</Stack>
 			<LinkBox>
