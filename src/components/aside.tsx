@@ -1,8 +1,8 @@
 import { type JSX } from "react"
-import { Box } from "@chakra-ui/react"
+import { Stack } from "@chakra-ui/react"
 
 export default function Aside():JSX.Element {
 	return (
-		<Box>this is the aside</Box>
+		<Stack as="aside">this is the aside</Stack>
 	)
 }
