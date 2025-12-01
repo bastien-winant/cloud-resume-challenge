@@ -26,7 +26,7 @@ export default function Aside() {
 					_hover={{ backgroundColor: "bg.inverted", color: "fg.inverted" }}
 				>
 					<Text fontSize="xs" fontWeight="medium">bastien.winant@gmail.com</Text>
-					<LinkOverlay href="#" />
+					<LinkOverlay href="mailto:bastien.winant@gmail.com" />
 				</LinkBox>
 				<LinkBox
 					py="3"
@@ -40,7 +40,7 @@ export default function Aside() {
 				<LinkBox
 					py="3"
 					borderTopWidth="thin"
-					px={2}
+					px="2"
 					_hover={{ backgroundColor: "bg.inverted", color: "fg.inverted" }}
 				>
 					<Text fontSize="xs" fontWeight="medium">GitHub</Text>
