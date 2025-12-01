@@ -1,7 +1,6 @@
-import { type JSX } from "react"
 import { Box } from "@chakra-ui/react"
 
-export default function About():JSX.Element {
+export default function About() {
 	return (
 		<Box>this is the about page</Box>
 	)

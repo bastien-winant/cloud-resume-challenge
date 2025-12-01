@@ -1,19 +1,26 @@
-import { type JSX } from "react"
-import Header from "@/components/header.tsx"
-import Aside from "@/components/aside.tsx"
+import { Container, Stack, Box } from "@chakra-ui/react"
+import Header from "@/components/Header"
+import Aside from "@/components/Aside"
 import { Outlet } from "react-router"
-import { Box, Stack } from "@chakra-ui/react"
 
-export default function Root():JSX.Element {
+export default function Root() {
 	return (
-		<Box>
+		<Container bg="bg" minH="100vh">
 			<Header />
-			<Stack>
+			<Stack
+				direction={{ base: "column", md: "row"}}
+				gap={{ md: 12 }}
+			>
 				<Aside />
-				<Box as="main">
+				<Box
+					as="main"
+					flexGrow="1"
+					borderTopWidth="thin"
+					pt="8"
+				>
 					<Outlet />
 				</Box>
 			</Stack>
-		</Box>
+		</Container>
 	)
 }
