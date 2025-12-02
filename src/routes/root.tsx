@@ -5,7 +5,7 @@ import { Outlet } from "react-router"
 
 export default function Root() {
 	return (
-		<Container bg="bg" minH="100vh" h="200vh">
+		<Container bg="bg" minH="100vh">
 			<Header />
 			<Stack
 				direction={{ base: "column", md: "row"}}
