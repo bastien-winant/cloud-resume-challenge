@@ -5,11 +5,14 @@ import { Outlet } from "react-router"
 
 export default function Root() {
 	return (
-		<Container bg="bg" minH="100vh">
+		<Container bg="bg" minH="100vh" h="200vh">
 			<Header />
 			<Stack
 				direction={{ base: "column", md: "row"}}
 				gap={{ md: 12 }}
+				position="sticky"
+				top="0"
+				left="0"
 			>
 				<Aside />
 				<Box
