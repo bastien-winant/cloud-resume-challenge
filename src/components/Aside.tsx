@@ -6,7 +6,7 @@ export default function Aside() {
 			as="aside"
 			borderTopWidth="thin"
 			pt="8"
-			pb="3"
+			pb="4"
 			gap={{ base: 20 }}
 			w={{ base: "full", md: "xs", lg: "sm"}}
 		>
