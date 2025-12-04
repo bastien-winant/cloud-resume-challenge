@@ -3,7 +3,7 @@ import Header from "@/components/Header"
 import Aside from "@/components/Aside"
 import { Outlet } from "react-router"
 
-export default function Root() {
+export default function Layout() {
 	return (
 		<Container bg="bg" minH="100vh">
 			<Header />
