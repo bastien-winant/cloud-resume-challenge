@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router"
 import Root from "./routes/root"
 import ErrorPage from "./error-page"
 import Index from "./routes/index"
+import Projects from "./routes/projects"
 import './index.css'
 
 const router = createBrowserRouter([
@@ -13,6 +14,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Index /> },
+      { path: "projects", element: <Projects /> }
     ],
   },
 ]);

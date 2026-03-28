@@ -11,7 +11,7 @@ export default function Root() {
 		)}>
 			<Header />
 			<Aside />
-			<main className="mx-2.5 md:mx-0 h-[200vh]">
+			<main className="mx-2.5 md:mx-0">
 				<Outlet />
 			</main>
 		</div>
