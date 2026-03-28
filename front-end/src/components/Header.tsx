@@ -14,7 +14,7 @@ export default function Header() {
 				<p className="font-extralight text-stone-400">senior producer</p>
 			</hgroup>
 			<Link to={location.pathname === "/" ? "projects" : "/"}>
-				{location.pathname === "/" ? "projects" : "about"}
+				{location.pathname === "/" ? "projects" : "back"}
 			</Link>
 		</header>
 	)
