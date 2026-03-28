@@ -7,7 +7,7 @@ export default function Aside() {
 			""
 		)}>
 			<p className="w-[80%] lg:w-[85%] max-w-96">
-				A seasoned Senior Producer with 10+ years of experience,
+				A self-taught Cloud Developer with 10+ years of experience,
 				I excel in leading complex marketing and design projects from concept to completion.
 			</p>
 			<nav className="flex flex-col text-xs font-normal">

@@ -10,8 +10,8 @@ export default function Header() {
 			"text-xl md:text-2xl font-medium capitalize"
 		)}>
 			<hgroup>
-				<h1>alexandra moore,</h1>
-				<p className="font-extralight text-stone-400">senior producer</p>
+				<h1>bastien winant,</h1>
+				<p className="font-extralight text-stone-400">cloud developer</p>
 			</hgroup>
 			<Link to={location.pathname === "/" ? "projects" : "/"}>
 				{location.pathname === "/" ? "projects" : "back"}
