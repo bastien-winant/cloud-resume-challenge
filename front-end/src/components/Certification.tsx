@@ -6,7 +6,7 @@ type CertificationProps = {
 
 export default function Certification({ imgUrl, title, url }: CertificationProps) {
 	return (
-		<article className="h-32 rounded-md flex gap-4 p-4 border border-stone-400/30 bg-stone-400/10">
+		<article className="rounded-md flex gap-4 p-4 pr-6 border border-stone-400/30 bg-stone-400/10">
 			<img src={imgUrl} alt={`${title} badge`} className="self-center w-20" />
 			<div className="flex flex-col gap-2">
 				<h2 className="font-medium">{title}</h2>
