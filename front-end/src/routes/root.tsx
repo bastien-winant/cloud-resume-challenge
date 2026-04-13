@@ -11,7 +11,7 @@ export default function Root() {
 		)}>
 			<Header />
 			<Aside />
-			<main className="border-t border-stone-400/40 py-7 mx-3">
+			<main className="mx-3">
 				<Outlet />
 			</main>
 		</div>
