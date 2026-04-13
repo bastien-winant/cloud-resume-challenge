@@ -1,20 +1,20 @@
-import { Link, useLocation } from "react-router"
-import { twMerge } from "tailwind-merge"
+import { useLocation, Link } from "react-router"
+import { twMerge } from "tailwind-merge";
 
 export default function Header() {
 	const location = useLocation()
 
 	return (
 		<header className={twMerge(
-			"md:col-span-2 h-52 lg:h-56 flex items-start justify-between",
-			"text-xl md:text-2xl font-medium capitalize"
+			"md:col-span-2 flex items-start justify-between h-52",
+			"text-xl capitalize"
 		)}>
 			<hgroup>
-				<h1>bastien winant,</h1>
-				<p className="font-extralight text-stone-400">cloud developer</p>
+				<h1 className="font-medium">alexandra moore,</h1>
+				<p className="text-stone-400">senior producer</p>
 			</hgroup>
-			<Link to={location.pathname === "/" ? "projects" : "/"}>
-				{location.pathname === "/" ? "projects" : "back"}
+			<Link to={ location.pathname === "/" ? "projects" : "/" } className="font-medium">
+				{ location.pathname === "/" ? "about" : "back" }
 			</Link>
 		</header>
 	)

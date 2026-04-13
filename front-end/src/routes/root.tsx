@@ -6,14 +6,14 @@ import { twMerge } from "tailwind-merge"
 export default function Root() {
 	return (
 		<div className={twMerge(
-			"min-h-dvh p-5 md:px-8 grid grid-cols-1 md:grid-cols-[320px_1fr] lg:grid-cols-[360px_1fr]",
-			"auto-rows-min gap-x-12 text-stone-100 text-sm lg:text-base font-extralight"
+			"min-h-dvh grid auto-rows-min grid-cols-1 md:grid-cols-[360px_1fr] p-5",
+			"bg-stone-950 text-stone-100 text-base font-light"
 		)}>
 			<Header />
 			<Aside />
-			<main className="mx-2.5 md:mx-0">
+			<main className="border-t border-stone-400/40 py-7 mx-3">
 				<Outlet />
 			</main>
 		</div>
-	)
+	);
 }
