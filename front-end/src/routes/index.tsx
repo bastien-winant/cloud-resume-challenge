@@ -45,7 +45,7 @@ export default function Index() {
 				</div>
 			</Section>
 			<Section title="skills">
-				<div className="flex flex-wrap gap-9">
+				<div className="flex flex-wrap gap-12">
 					<SkillSet
 						category="Strategic & Creative Oversight"
 						skills={[

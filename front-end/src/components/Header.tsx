@@ -13,7 +13,7 @@ export default function Header() {
 				<h1 className="font-medium">alexandra moore,</h1>
 				<p className="text-stone-400">senior producer</p>
 			</hgroup>
-			<Link to={ location.pathname === "/" ? "projects" : "/" } className="font-medium">
+			<Link to={ location.pathname === "/" ? "about" : "/" } className="font-medium">
 				{ location.pathname === "/" ? "about" : "back" }
 			</Link>
 		</header>
