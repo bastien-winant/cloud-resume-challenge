@@ -11,9 +11,12 @@ export default function Root() {
 		)}>
 			<Header />
 			<Aside />
-			<main className="mx-3">
-				<Outlet />
-			</main>
+			<div className="mx-3 flex flex-col gap-100 bg-stone-950">
+				<main>
+					<Outlet />
+				</main>
+				<a href="mailto:bastien.winant@gmail.com" className="mb-2 text-xl font-medium">Contact me</a>
+			</div>
 		</div>
 	);
 }
