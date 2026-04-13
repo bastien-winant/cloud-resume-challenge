@@ -3,7 +3,7 @@ import Section from "../components/Section"
 export default function About() {
 	return (
 		<Section title="About me">
-			<div className="flex flex-col gap-12 text-xl">
+			<div className="flex flex-col gap-12 text-xl lg:text-2xl max-w-160">
 				<p>
 					Here's the deal. I'm Alexandra, and honestly? I think being a producer is kinda like being a really organized
 					friend who also happens to be a ninja at making cool stuff happen. My philosophy? Keep it smooth, keep it fun,

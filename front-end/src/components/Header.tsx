@@ -7,13 +7,13 @@ export default function Header() {
 	return (
 		<header className={twMerge(
 			"md:col-span-2 flex items-start justify-between h-52",
-			"text-xl capitalize"
+			"text-xl xl:text-2xl capitalize"
 		)}>
 			<hgroup>
 				<h1 className="font-medium">alexandra moore,</h1>
 				<p className="text-stone-400">senior producer</p>
 			</hgroup>
-			<Link to={ location.pathname === "/" ? "about" : "/" } className="font-medium">
+			<Link to={ location.pathname === "/" ? "about" : "/" } className="font-medium hover:outline-none">
 				{ location.pathname === "/" ? "about" : "back" }
 			</Link>
 		</header>

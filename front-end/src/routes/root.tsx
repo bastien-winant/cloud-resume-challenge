@@ -7,7 +7,7 @@ export default function Root() {
 	return (
 		<div className={twMerge(
 			"min-h-dvh grid auto-rows-min grid-cols-1 md:grid-cols-[360px_1fr] gap-x-10 p-5 md:px-7",
-			"text-stone-100 text-base font-light"
+			"bg-stone-950 text-stone-100 text-base font-light"
 		)}>
 			<Header />
 			<Aside />
@@ -15,7 +15,7 @@ export default function Root() {
 				<main>
 					<Outlet />
 				</main>
-				<a href="mailto:bastien.winant@gmail.com" className="mb-2 text-xl font-medium">Contact me</a>
+				<a href="mailto:bastien.winant@gmail.com" className="mb-2 text-xl xl:text-2xl font-medium">Contact me</a>
 			</div>
 		</div>
 	);
