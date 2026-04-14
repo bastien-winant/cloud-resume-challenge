@@ -4,7 +4,7 @@ import logging
 
 # Firehose client
 firehose = boto3.client("firehose")
-delivery_stream_name = ""
+delivery_stream_name = "CloudResumeChallengeStream"
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
