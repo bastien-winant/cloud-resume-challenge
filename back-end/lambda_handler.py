@@ -48,7 +48,19 @@ def create_record_entry(record: dict) -> dict:
     Raises:
         Exception: If a simulated network error occurs.
     """
-    return {"Data": json.dumps(record)}
+
+    entry = {
+        "id": record["requestContext"]["requestId"],
+        "timestamp": record["requestContext"]["requestTime"],
+        "ip": record["requestContext"]["identity"]["sourceIp"],
+        "user_agent": record["headers"]["User-Agent"],
+        "desktop": record["headers"]["CloudFront-Is-Desktop-Viewer"],
+        "mobile": record["headers"]["CloudFront-Is-Mobile-Viewer"],
+        "tablet": record["headers"]["CloudFront-Is-Tablet-Viewer"],
+        "country": record["headers"]["CloudFront-Viewer-Country"],
+    }
+
+    return {"Data": json.dumps(entry)}
 
 
 def put_record(record: dict):
@@ -81,5 +93,4 @@ def lambda_handler(event, context):
     PUT, or DELETE request respectively, passing in the payload to the
     DynamoDB API as a JSON body.
     '''
-    print("Received event: " + json.dumps(event, indent=2))
     put_record(event)
