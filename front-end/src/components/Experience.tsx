@@ -9,7 +9,7 @@ type ExperienceProps = {
 
 export default function Experience({ title, company, start_date, end_date, location, tasks}: ExperienceProps) {
 	return (
-		<section className="py-5 flex flex-wrap gap-7 border-t border-stone-400/20">
+		<section className="py-5 grid grid-cols-1 lg:grid-cols-[25vw_1fr] gap-7 border-t border-stone-400/20">
 			<div>
 				<h3 className="capitalize font-medium mb-3">{title}</h3>
 				<ul className="text-stone-400">
