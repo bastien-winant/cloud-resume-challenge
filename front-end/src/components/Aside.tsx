@@ -5,21 +5,21 @@ export default function Aside() {
 				A seasoned Senior Producer with 10+ years of experience,
 				I excel in leading complex marketing and design projects from concept to completion.
 			</p>
-			<nav className="flex flex-col text-xs">
+			<nav className="flex flex-col text-xs md:text-sm">
 				<a
 					href="mailto:bastien.winant@gmail.com"
 					className="px-1.5 py-3 border-t border-stone-400/20 hover:bg-stone-50 hover:text-stone-950"
-				>hello@figma.com</a>
+				>Email</a>
 				<a
 					href="https://github.com/bastien-winant"
 					target="_blank"
 					className="px-1.5 py-3 border-t border-stone-400/20 hover:bg-stone-50 hover:text-stone-950"
-				>(555) 123-4567</a>
+				>GitHub</a>
 				<a
 					href="https://www.xing.com/profile/Bastien_Winant"
 					target="_blank"
 					className="px-1.5 py-3 border-t border-stone-400/20 hover:bg-stone-50 hover:text-stone-950"
-				>Linkedin</a>
+				>Xing</a>
 			</nav>
 		</aside>
 	)

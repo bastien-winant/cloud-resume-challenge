@@ -10,8 +10,8 @@ export default function Header() {
 			"text-xl xl:text-2xl capitalize"
 		)}>
 			<hgroup>
-				<h1 className="font-medium">alexandra moore,</h1>
-				<p className="text-stone-400">senior producer</p>
+				<h1 className="font-medium">bastien winant,</h1>
+				<p className="text-stone-400">cloud developer</p>
 			</hgroup>
 			<Link to={ location.pathname === "/" ? "about" : "/" } className="font-medium hover:outline-none">
 				{ location.pathname === "/" ? "about" : "back" }

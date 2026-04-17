@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-	--text-sm: 15px;
+	--text-base: 15px;
+	--text-md: 16px;
 	--text-xs: 11px;
+	--text-sm: 12px;
 }
