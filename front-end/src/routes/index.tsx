@@ -83,6 +83,9 @@ export default function Index() {
 					</div>
 				</div>
 			</Section>
+			<Section title="certifications">
+				this is the certifications section
+			</Section>
 		</div>
 	);
 }
