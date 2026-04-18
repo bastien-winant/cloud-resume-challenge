@@ -14,14 +14,17 @@ table = dynamodb.Table('CloudResumeVisitLogs')
 
 
 def lambda_handler(event, context):
-    # Get the object from the event and show its content type
+    # Get the object from the event
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
+    
     try:
+        # Parse the object content as linebreak-separated json objects
         response = s3.get_object(Bucket=bucket, Key=key)
         content = response['Body'].read().decode('utf-8').strip("\n")
         entries = [json.loads(entry) for entry in content.split("\n")]
 
+        # Load each log the DynamoDB
         for entry in entries:
             table.update_item(
                 Key={
