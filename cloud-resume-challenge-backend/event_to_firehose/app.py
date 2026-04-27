@@ -66,3 +66,9 @@ def _log_response(response: dict, entry: dict):
 		logger.info(f"Sent record: {entry}")
 	else:
 		logger.info(f"Fail record: {entry}")
+
+def lambda_handler(event, context):
+	try:
+		put_record(event)
+	except Exception as e:
+		raise e
