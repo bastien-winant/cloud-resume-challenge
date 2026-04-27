@@ -47,9 +47,9 @@ def _create_record_entry(record: dict) -> dict:
 			Exception: If a simulated network error occurs.
 	"""
 	if random.random() < 0.2:
-			raise Exception("Simulated network error")
+		raise Exception("Simulated network error")
 	elif random.random() < 0.1:
-			return {"Data": '{"malformed": "data"'}
+		return {"Data": '{"malformed": "data"'}
 
 	return {"Data": json.dumps(record)}
 
@@ -62,6 +62,6 @@ def _log_response(response: dict, entry: dict):
 			entry (dict): The record entry that was sent.
 	"""
 	if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
-			logger.info(f"Sent record: {entry}")
+		logger.info(f"Sent record: {entry}")
 	else:
-			logger.info(f"Fail record: {entry}")
+		logger.info(f"Fail record: {entry}")
