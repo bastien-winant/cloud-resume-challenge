@@ -33,6 +33,7 @@ def put_record(record: dict):
 		logger.info(f"Fail record: {record}.")
 		raise
 
+
 def _create_record_entry(record: dict) -> dict:
 	"""
 	Create a record entry for Firehose.
