@@ -1,12 +1,13 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
 import json
+import logging
 import urllib.parse
 import boto3
 
-print('Loading function')
-
 s3 = boto3.client('s3')
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def lambda_handler(event, context):
@@ -18,8 +19,6 @@ def lambda_handler(event, context):
 		print("CONTENT TYPE: " + response['ContentType'])
 		return response['ContentType']
 	except Exception as e:
-		print(e)
-		print(
-			'Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(
-				key, bucket))
+		logger.info(
+			f'Error getting object {key} from bucket {bucket}. Make sure they exist and your bucket is in the same region as this function.')
 		raise e
