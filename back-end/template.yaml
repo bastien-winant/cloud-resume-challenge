@@ -1,0 +1,134 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  back-end
+
+  Sample SAM Template for back-end
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Parameters:
+  ExistingS3BucketArn:
+    Type: String
+    Description: >
+      By default, the app creates an S3 bucket to store the logs. However, if this value is populated with a bucket ARN, that bucket will
+      be used instead. Use this if you have an existing S3 bucket or need to control more advanced configuration settings on your bucket.
+    Default: ''
+  KeyPrefix:
+    Type: String
+    Description: Prefix used for S3 files
+    Default: 'kinesis-data-firehose-to-s3/'
+  CompressionFormat:
+    Type: String
+    Description: Compression format for S3 files
+    AllowedValues:
+      - UNCOMPRESSED
+      - GZIP
+      - ZIP
+      - Snappy
+    Default: UNCOMPRESSED
+  EnableBucketEncryption:
+    Description: Set to true to enable server-side encryption on the S3 bucket using the default aws/s3 AWS KMS master key.
+    Type: String
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+  BufferingIntervalInSeconds:
+    Description: >
+      Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination.
+      See https://docs.aws.amazon.com/firehose/latest/APIReference/API_BufferingHints.html for details.
+    Type: Number
+    MinValue: 60
+    MaxValue: 900
+    Default: 300
+  BufferingSizeInMBs:
+    Description: >
+      Buffer incoming data to the specified size, in MBs, before delivering it to the destination. Note, if you specify a DataTransformationLambdaFunctionArn, you should
+      not set this higher than 6. See https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html for details.
+    Type: Number
+    MinValue: 1
+    MaxValue: 128
+    Default: 5
+  DataTransformationLambdaFunctionArn:
+    Description: >
+      ARN of data transformation Lambda function. This optional parameter allows you to configure a Lambda function to be invoked by
+      Kinesis Firehose to transformation incoming events before they are saved to S3. For example, you could use this to remove sensitive
+      data to meet compliance regulations.
+    Type: String
+    Default: ''
+
+Conditions:
+  DataTransformationEnabled:
+    !Not [!Equals [!Ref DataTransformationLambdaFunctionArn, '']]
+  CreateS3Bucket:
+    !Equals [!Ref ExistingS3BucketArn, '']
+  BucketEncryptionEnabled:
+    !Equals [!Ref EnableBucketEncryption, 'true']
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello_world/
+      Handler: app.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /hello
+            Method: get
+
+  EventToFirehoseFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: event_to_firehose/
+      Handler: app.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /log
+            Method: post
+
+  S3ToDynamoFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: s3_to_dynamo/
+      Handler: app.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/hello/"
+  HelloWorldFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt HelloWorldFunctionRole.Arn
+
+  EventToFirehoseApi:
+    Description: "API Gateway endpoint URL for Prod stage for Event To Firehose function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/log/"
+  EventToFirehoseFunction:
+    Description: "Event To Firehose Lambda Function ARN"
+    Value: !GetAtt EventToFirehoseFunction.Arn
+  EventToFirehoseFunctionIamRole:
+    Description: "Implicit IAM Role created for Event To Firehose function"
+    Value: !GetAtt EventToFirehoseFunctionRole.Arn
