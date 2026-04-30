@@ -37,10 +37,10 @@ class FirehoseClient:
 		self.delivery_stream_name = config.delivery_stream_name
 		self.region = config.region
 
-		try:
-			self.firehose = boto3.client("firehose", region_name=self.region)
-		except Exception as e:
-			logger.info(f"Failed to instantiate the Firehose client: {e}")
+		# try:
+		# 	self.firehose = boto3.client("firehose", region_name=self.region)
+		# except Exception as e:
+		# 	logger.info(f"Failed to instantiate the Firehose client: {e}")
 
 	@backoff.on_exception(backoff.expo, Exception, max_tries=5, jitter=backoff.full_jitter)
 	def put_record(self, record: dict):
@@ -75,12 +75,18 @@ class FirehoseClient:
 		Raises:
 			Exception: If a simulated network error occurs.
 		"""
-		if random.random() < 0.2:
-			raise Exception("Simulated network error")
-		elif random.random() < 0.1:
-			return {"Data": '{"malformed": "data"'}
+		try:
+			entry = {
+				'id': record["requestContext"]["requestId"],
+				'timestamp': record["requestContext"]["requestTimeEpoch"],
+				'user_agent': record["headers"]["User-Agent"],
+				'referer': record["headers"].get("Referer"),
+				'ip_address': record["requestContext"]["identity"]["sourceIp"]
+			}
 
-		return {"Data": json.dumps(record)}
+			return {"Data": entry}
+		except KeyError as e:
+			logger.info(f"Fail record: {record}")
 
 	def _log_response(self, response: dict, entry: dict):
 		"""
