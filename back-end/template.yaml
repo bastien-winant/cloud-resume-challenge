@@ -11,12 +11,10 @@ Globals:
     Timeout: 3
 
 Parameters:
-  ExistingS3BucketArn:
+  S3BucketName:
     Type: String
-    Description: >
-      By default, the app creates an S3 bucket to store the logs. However, if this value is populated with a bucket ARN, that bucket will
-      be used instead. Use this if you have an existing S3 bucket or need to control more advanced configuration settings on your bucket.
-    Default: ''
+    Description: Name of the S3 bucket that stores the logs.
+    Default: 'cloud-resume-visitor-logs'
   KeyPrefix:
     Type: String
     Description: Prefix used for S3 files
@@ -30,13 +28,6 @@ Parameters:
       - ZIP
       - Snappy
     Default: UNCOMPRESSED
-  EnableBucketEncryption:
-    Description: Set to true to enable server-side encryption on the S3 bucket using the default aws/s3 AWS KMS master key.
-    Type: String
-    AllowedValues:
-      - 'true'
-      - 'false'
-    Default: 'false'
   BufferingIntervalInSeconds:
     Description: >
       Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination.
@@ -53,23 +44,54 @@ Parameters:
     MinValue: 1
     MaxValue: 128
     Default: 5
-  DataTransformationLambdaFunctionArn:
-    Description: >
-      ARN of data transformation Lambda function. This optional parameter allows you to configure a Lambda function to be invoked by
-      Kinesis Firehose to transformation incoming events before they are saved to S3. For example, you could use this to remove sensitive
-      data to meet compliance regulations.
-    Type: String
-    Default: ''
-
-Conditions:
-  DataTransformationEnabled:
-    !Not [!Equals [!Ref DataTransformationLambdaFunctionArn, '']]
-  CreateS3Bucket:
-    !Equals [!Ref ExistingS3BucketArn, '']
-  BucketEncryptionEnabled:
-    !Equals [!Ref EnableBucketEncryption, 'true']
 
 Resources:
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3BucketName
+      BucketNamespace: account-regional
+
+  DeliveryStreamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - firehose.amazonaws.com
+            Action:
+              - sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub ${AWS::AccountId}
+      Policies:
+        - PolicyName: firehose-s3-put-policy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:PutObject
+                Resource:
+                  - !GetAtt Bucket.Arn
+                  - !Sub ${Bucket.Arn}/*
+
+  DeliveryStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: cloud-resume-visitor-logs-stream
+      DeliveryStreamType: DirectPut
+      S3DestinationConfiguration:
+        BucketARN: !GetAtt Bucket.Arn
+        RoleARN: !GetAtt DeliveryStreamRole.Arn
+        CompressionFormat: !Ref CompressionFormat
+
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -123,6 +145,20 @@ Outputs:
     Description: "Implicit IAM Role created for Hello World function"
     Value: !GetAtt HelloWorldFunctionRole.Arn
 
+  BucketName:
+    Description: Data bucket name
+    Value: !Ref Bucket
+  BucketArn:
+    Description: Data bucket ARN
+    Value: !GetAtt Bucket.Arn
+
+  DeliveryStreamName:
+    Description: Kinesis Data Firehose delivery stream name
+    Value: !Ref DeliveryStream
+  DeliveryStreamArn:
+    Description: Kinesis Data Firehose delivery stream ARN
+    Value: !GetAtt DeliveryStream.Arn
+
   EventToFirehoseApi:
     Description: "API Gateway endpoint URL for Prod stage for Event To Firehose function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/log/"
@@ -132,3 +168,10 @@ Outputs:
   EventToFirehoseFunctionIamRole:
     Description: "Implicit IAM Role created for Event To Firehose function"
     Value: !GetAtt EventToFirehoseFunctionRole.Arn
+
+  S3ToDynamoFunction:
+    Description: "Hello S3 To Dynamo Function ARN"
+    Value: !GetAtt S3ToDynamoFunction.Arn
+  S3ToDynamoFunctionIamRole:
+    Description: "Implicit IAM Role created for S3 To Dynamo function"
+    Value: !GetAtt S3ToDynamoFunctionRole.Arn
