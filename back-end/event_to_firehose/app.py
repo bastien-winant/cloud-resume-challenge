@@ -85,7 +85,7 @@ class FirehoseClient:
 			}
 
 			return {"Data": entry}
-		except KeyError as e:
+		except KeyError:
 			logger.info(f"Fail record: {record}")
 
 	def _log_response(self, response: dict, entry: dict):
