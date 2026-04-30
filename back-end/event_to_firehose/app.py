@@ -36,11 +36,7 @@ class FirehoseClient:
 		self.config = config
 		self.delivery_stream_name = config.delivery_stream_name
 		self.region = config.region
-
-		# try:
-		# 	self.firehose = boto3.client("firehose", region_name=self.region)
-		# except Exception as e:
-		# 	logger.info(f"Failed to instantiate the Firehose client: {e}")
+		self.firehose = boto3.client("firehose", region_name=self.region)
 
 	@backoff.on_exception(backoff.expo, Exception, max_tries=5, jitter=backoff.full_jitter)
 	def put_record(self, record: dict):
@@ -55,8 +51,8 @@ class FirehoseClient:
 		"""
 		try:
 			entry = self._create_record_entry(record)
-			# response = self.firehose.put_record(DeliveryStreamName=self.delivery_stream_name, Record=entry)
-			# self._log_response(response, entry)
+			response = self.firehose.put_record(DeliveryStreamName=self.delivery_stream_name, Record=entry)
+			self._log_response(response, entry)
 			return entry
 		except Exception:
 			logger.info(f"Fail record: {record}.")
