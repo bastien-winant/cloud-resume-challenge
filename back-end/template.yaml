@@ -13,7 +13,7 @@ Globals:
 Parameters:
   S3BucketName:
     Type: String
-    Description: Name of the S3 bucket that stores the logs.
+    Description: Name for the S3 bucket that will contain the formatted API hit logs
     Default: 'cloud-resume-visitor-logs'
   KeyPrefix:
     Type: String
@@ -82,16 +82,32 @@ Resources:
                   - !GetAtt Bucket.Arn
                   - !Sub ${Bucket.Arn}/*
 
+  ProcessVisitorLogFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: process_visitor_logs/
+      Handler: app.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+
   DeliveryStream:
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties:
       DeliveryStreamName: cloud-resume-visitor-logs-stream
       DeliveryStreamType: DirectPut
-      S3DestinationConfiguration:
-        BucketARN: !GetAtt Bucket.Arn
+      ExtendedS3DestinationConfiguration:
+        BucketARN : !GetAtt Bucket.Arn
         RoleARN: !GetAtt DeliveryStreamRole.Arn
         CompressionFormat: !Ref CompressionFormat
-
+        ProcessingConfiguration:
+          Enabled: true
+          Processors:
+            - Type: Lambda
+              Parameters:
+                - ParameterName: LambdaArn
+                  ParameterValue: !GetAtt ProcessVisitorLogFunction.Arn
+  
   EventToFirehoseFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -117,9 +133,6 @@ Resources:
         - x86_64
 
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   BucketName:
     Description: Data bucket name
     Value: !Ref Bucket
@@ -134,6 +147,16 @@ Outputs:
     Description: Kinesis Data Firehose delivery stream ARN
     Value: !GetAtt DeliveryStream.Arn
 
+  ProcessVisitorLogFunction:
+    Description: "S3 To Dynamo Lambda Function ARN"
+    Value: !GetAtt ProcessVisitorLogFunction.Arn
+  ProcessVisitorLogFunctionIamRole:
+    Description: "Implicit IAM Role created for S3 To Dynamo function"
+    Value: !GetAtt ProcessVisitorLogFunctionRole.Arn
+
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   EventToFirehoseApi:
     Description: "API Gateway endpoint URL for Prod stage for Event To Firehose function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/log/"
@@ -145,7 +168,7 @@ Outputs:
     Value: !GetAtt EventToFirehoseFunctionRole.Arn
 
   S3ToDynamoFunction:
-    Description: "Hello S3 To Dynamo Function ARN"
+    Description: "S3 To Dynamo Lambda Function ARN"
     Value: !GetAtt S3ToDynamoFunction.Arn
   S3ToDynamoFunctionIamRole:
     Description: "Implicit IAM Role created for S3 To Dynamo function"

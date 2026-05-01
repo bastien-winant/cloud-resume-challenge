@@ -31,7 +31,7 @@ class FirehoseClient:
 		Initialize the FirehoseClient.
 
 		Args:
-				config (object): Configuration object with delivery stream name and region.
+			config (object): Configuration object with delivery stream name and region.
 		"""
 		self.config = config
 		self.delivery_stream_name = config.delivery_stream_name
@@ -44,7 +44,7 @@ class FirehoseClient:
 		Put individual records to Firehose with backoff and retry.
 
 		Args:
-				record (dict): The data record to be sent to Firehose.
+			record (dict): The data record to be sent to Firehose.
 
 		This method attempts to send an individual record to the Firehose delivery stream.
 		It retries with exponential backoff in case of exceptions.
@@ -89,8 +89,8 @@ class FirehoseClient:
 		Log the response from Firehose.
 
 		Args:
-				response (dict): The response from the Firehose put_record API call.
-				entry (dict): The record entry that was sent.
+			response (dict): The response from the Firehose put_record API call.
+			entry (dict): The record entry that was sent.
 		"""
 		if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
 			logger.info(f"Sent record: {entry}")
@@ -100,9 +100,12 @@ class FirehoseClient:
 def lambda_handler(event, context):
 	config = Config()
 	client = FirehoseClient(config)
-	entry = client.put_record(event)
 
-	return {
-		"statusCode": 200,
-		"body": json.dumps(entry),
-	}
+	try:
+		entry = client.put_record(event)
+		return {
+			"statusCode": 200,
+			"body": json.dumps(entry),
+		}
+	except Exception as e:
+		logger.info(f"Put record failed after retries and backoff: {e}")
