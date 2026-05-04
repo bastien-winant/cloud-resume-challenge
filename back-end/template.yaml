@@ -112,7 +112,7 @@ Resources:
           IntervalInSeconds: !Ref BufferingIntervalInSeconds
           SizeInMBs: !Ref BufferingSizeInMBs
         CompressionFormat: !Ref CompressionFormat
-        Prefix: "year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}"
+        Prefix: "year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
         ErrorOutputPrefix: "errors/!{firehose:error-output-type}/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
         ProcessingConfiguration:
           Enabled: True
