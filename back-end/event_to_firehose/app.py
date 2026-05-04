@@ -55,6 +55,7 @@ class FirehoseClient:
 			entry = self._create_record_entry(record)
 			response = self.firehose.put_record(DeliveryStreamName=self.delivery_stream_name, Record=entry)
 			self._log_response(response, entry)
+			return response
 		except Exception:
 			logger.info(f"Fail record: {record}.")
 			raise
@@ -72,7 +73,7 @@ class FirehoseClient:
 		Raises:
 			Exception: If a simulated network error occurs.
 		"""
-		return {"Data": json.dumps(record)}
+		return {"Data": json.dumps(record) + "\n"}
 
 	def _log_response(self, response: dict, entry: dict):
 		"""
@@ -93,6 +94,11 @@ def lambda_handler(event, context):
 	client = FirehoseClient(config)
 
 	try:
-		client.put_record(event)
+		response = client.put_record(event)
+
+		return {
+			"statusCode": 200,
+			"body": json.dumps(response)
+		}
 	except Exception as e:
 		logger.info(f"Put record failed after retries and backoff: {e}")

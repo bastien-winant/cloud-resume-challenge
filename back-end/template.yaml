@@ -119,6 +119,8 @@ Resources:
           IntervalInSeconds: !Ref BufferingIntervalInSeconds
           SizeInMBs: !Ref BufferingSizeInMBs
         CompressionFormat: !Ref CompressionFormat
+        Prefix: "year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}"
+        ErrorOutputPrefix: "errors/!{firehose:error-output-type}/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}"
         ProcessingConfiguration: !If
           - DataTransformationEnabled
           - Enabled: true
