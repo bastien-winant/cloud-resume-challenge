@@ -8,12 +8,14 @@ import boto3
 
 class Config:
 	def __init__(self):
-		self.delivery_stream_name = "cloud-resume-visitor-logs-stream"
+		self.delivery_stream_name = "cloud-resume-visitor-log-stream"
 		self.region = "eu-central-1"
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class FirehoseClient:
 	"""
@@ -53,7 +55,6 @@ class FirehoseClient:
 			entry = self._create_record_entry(record)
 			response = self.firehose.put_record(DeliveryStreamName=self.delivery_stream_name, Record=entry)
 			self._log_response(response, entry)
-			return entry
 		except Exception:
 			logger.info(f"Fail record: {record}.")
 			raise
@@ -71,18 +72,7 @@ class FirehoseClient:
 		Raises:
 			Exception: If a simulated network error occurs.
 		"""
-		try:
-			entry = {
-				'id': record["requestContext"]["requestId"],
-				'timestamp': record["requestContext"]["requestTimeEpoch"],
-				'user_agent': record["headers"]["User-Agent"],
-				'referer': record["headers"].get("Referer"),
-				'ip_address': record["requestContext"]["identity"]["sourceIp"]
-			}
-
-			return {"Data": entry}
-		except KeyError:
-			logger.info(f"Fail record: {record}")
+		return {"Data": json.dumps(record)}
 
 	def _log_response(self, response: dict, entry: dict):
 		"""
@@ -97,15 +87,12 @@ class FirehoseClient:
 		else:
 			logger.info(f"Fail record: {entry}")
 
+
 def lambda_handler(event, context):
 	config = Config()
 	client = FirehoseClient(config)
 
 	try:
-		entry = client.put_record(event)
-		return {
-			"statusCode": 200,
-			"body": json.dumps(entry),
-		}
+		client.put_record(event)
 	except Exception as e:
 		logger.info(f"Put record failed after retries and backoff: {e}")

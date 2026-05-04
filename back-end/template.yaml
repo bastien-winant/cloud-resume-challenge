@@ -5,20 +5,19 @@ Description: >
 
   Sample SAM Template for back-end
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 3
 
 Parameters:
-  S3BucketName:
+  BucketPrefix:
     Type: String
-    Description: Name for the S3 bucket that will contain the formatted API hit logs
-    Default: 'cloud-resume-visitor-logs'
-  KeyPrefix:
+    Description: Prefix for the S3 Bucket that contains visitor logs
+    Default: cloud-resume-visitor-logs
+  DeliveryStreamName:
     Type: String
-    Description: Prefix used for S3 files
-    Default: 'kinesis-data-firehose-to-s3/'
+    Description: Name of the Data Firehose that transforms and sends the logs to S3
+    Default: cloud-resume-visitor-log-stream
   CompressionFormat:
     Type: String
     Description: Compression format for S3 files
@@ -28,6 +27,13 @@ Parameters:
       - ZIP
       - Snappy
     Default: UNCOMPRESSED
+  EnableBucketEncryption:
+    Description: Set to true to enable server-side encryption on the S3 bucket using the default aws/s3 AWS KMS master key.
+    Type: String
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
   BufferingIntervalInSeconds:
     Description: >
       Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination.
@@ -44,12 +50,23 @@ Parameters:
     MinValue: 1
     MaxValue: 128
     Default: 5
+  DataTransformationLambdaFunctionArn:
+    Description: >
+      ARN of data transformation Lambda function. This optional parameter allows you to configure a Lambda function to be invoked by
+      Kinesis Firehose to transformation incoming events before they are saved to S3. For example, you could use this to remove sensitive
+      data to meet compliance regulations.
+    Type: String
+    Default: ''
+
+Conditions:
+  DataTransformationEnabled:
+    !Not [!Equals [!Ref DataTransformationLambdaFunctionArn, '']]
 
 Resources:
   Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Ref S3BucketName
+      BucketNamePrefix: !Ref BucketPrefix
       BucketNamespace: account-regional
 
   DeliveryStreamRole:
@@ -67,7 +84,7 @@ Resources:
               StringEquals:
                 sts:ExternalId: !Sub ${AWS::AccountId}
       Policies:
-        - PolicyName: firehose-s3-put-policy
+        - PolicyName: S3ReadWrite
           PolicyDocument:
             Statement:
               - Effect: Allow
@@ -81,56 +98,75 @@ Resources:
                 Resource:
                   - !GetAtt Bucket.Arn
                   - !Sub ${Bucket.Arn}/*
-
-  ProcessVisitorLogFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      CodeUri: process_visitor_logs/
-      Handler: app.lambda_handler
-      Runtime: python3.14
-      Architectures:
-        - x86_64
+              - !If
+                - DataTransformationEnabled
+                - Effect: Allow
+                  Action:
+                    - lambda:InvokeFunction
+                  Resource:
+                    - !Ref DataTransformationLambdaFunctionArn
+                - !Ref AWS::NoValue
 
   DeliveryStream:
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties:
-      DeliveryStreamName: cloud-resume-visitor-logs-stream
+      DeliveryStreamName: !Ref DeliveryStreamName
       DeliveryStreamType: DirectPut
       ExtendedS3DestinationConfiguration:
-        BucketARN : !GetAtt Bucket.Arn
+        BucketARN: !GetAtt Bucket.Arn
         RoleARN: !GetAtt DeliveryStreamRole.Arn
+        BufferingHints:
+          IntervalInSeconds: !Ref BufferingIntervalInSeconds
+          SizeInMBs: !Ref BufferingSizeInMBs
         CompressionFormat: !Ref CompressionFormat
-        ProcessingConfiguration:
-          Enabled: true
-          Processors:
-            - Type: Lambda
-              Parameters:
-                - ParameterName: LambdaArn
-                  ParameterValue: !GetAtt ProcessVisitorLogFunction.Arn
-  
-  EventToFirehoseFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        ProcessingConfiguration: !If
+          - DataTransformationEnabled
+          - Enabled: true
+            Processors:
+              - Type: Lambda
+                Parameters:
+                  - ParameterName: LambdaArn
+                    ParameterValue: !Ref DataTransformationLambdaFunctionArn
+          - !Ref AWS::NoValue
+
+  EventToFirehoseFunctionRole:
+    Type: AWS::IAM::Role
     Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: FirehoseWrite
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - firehose:PutRecord
+                  - firehose:PutRecordBatch
+                Resource: !GetAtt DeliveryStream.Arn
+
+  EventToFirehoseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Role: !GetAtt EventToFirehoseFunctionRole.Arn
       CodeUri: event_to_firehose/
       Handler: app.lambda_handler
       Runtime: python3.14
       Architectures:
         - x86_64
       Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        EventToFirehose:
+          Type: Api
           Properties:
             Path: /log
             Method: post
-
-  S3ToDynamoFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      CodeUri: s3_to_dynamo/
-      Handler: app.lambda_handler
-      Runtime: python3.14
-      Architectures:
-        - x86_64
 
 Outputs:
   BucketName:
@@ -147,16 +183,6 @@ Outputs:
     Description: Kinesis Data Firehose delivery stream ARN
     Value: !GetAtt DeliveryStream.Arn
 
-  ProcessVisitorLogFunction:
-    Description: "S3 To Dynamo Lambda Function ARN"
-    Value: !GetAtt ProcessVisitorLogFunction.Arn
-  ProcessVisitorLogFunctionIamRole:
-    Description: "Implicit IAM Role created for S3 To Dynamo function"
-    Value: !GetAtt ProcessVisitorLogFunctionRole.Arn
-
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   EventToFirehoseApi:
     Description: "API Gateway endpoint URL for Prod stage for Event To Firehose function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/log/"
@@ -166,10 +192,3 @@ Outputs:
   EventToFirehoseFunctionIamRole:
     Description: "Implicit IAM Role created for Event To Firehose function"
     Value: !GetAtt EventToFirehoseFunctionRole.Arn
-
-  S3ToDynamoFunction:
-    Description: "S3 To Dynamo Lambda Function ARN"
-    Value: !GetAtt S3ToDynamoFunction.Arn
-  S3ToDynamoFunctionIamRole:
-    Description: "Implicit IAM Role created for S3 To Dynamo function"
-    Value: !GetAtt S3ToDynamoFunctionRole.Arn
