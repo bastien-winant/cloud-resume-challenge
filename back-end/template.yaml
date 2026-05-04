@@ -43,6 +43,10 @@ Parameters:
     MinValue: 1
     MaxValue: 128
     Default: 5
+  DynamoTableName:
+    Type: String
+    Description: Name of the DynamoDB table that holds the formatted cloud resume visitor logs
+    Default: cloud-resume-visitor-logs
 
 Resources:
   Bucket:
@@ -154,6 +158,21 @@ Resources:
             Path: /log
             Method: post
 
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: epoch
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: epoch
+          AttributeType: N
+      TableName: !Ref DynamoTableName
+
 Outputs:
   BucketName:
     Description: Data bucket name
@@ -178,3 +197,10 @@ Outputs:
   EventToFirehoseFunctionIamRole:
     Description: "Implicit IAM Role created for Event To Firehose function"
     Value: !GetAtt EventToFirehoseFunctionRole.Arn
+
+  DynamoDBTableName:
+    Description: DynamoDB table name
+    Value: !Ref DynamoTableName
+  DynamoDBTableArn:
+    Description: DynamoDB table ARN
+    Value: !GetAtt DynamoDBTable.Arn
