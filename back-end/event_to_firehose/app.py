@@ -73,7 +73,7 @@ class FirehoseClient:
 		Raises:
 			Exception: If a simulated network error occurs.
 		"""
-		return {"Data": json.dumps(record) + "\n"}
+		return {"Data": json.dumps(record)}
 
 	def _log_response(self, response: dict, entry: dict):
 		"""

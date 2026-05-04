@@ -17,10 +17,12 @@ def lambda_handler(event, context):
 				'epoch': payload['requestContext']['requestTimeEpoch'],
 			}
 
+			log = json.dumps(entry) + "\n"
+
 			output_record = {
 				'recordId': record['recordId'],
 				'result': 'Ok',
-				'data': base64.b64encode(json.dumps(entry).encode('utf-8')).decode('utf-8')
+				'data': base64.b64encode(log.encode('utf-8')).decode('utf-8')
 			}
 			output.append(output_record)
 		except Exception as e:
