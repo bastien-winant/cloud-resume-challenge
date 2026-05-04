@@ -50,17 +50,6 @@ Parameters:
     MinValue: 1
     MaxValue: 128
     Default: 5
-  DataTransformationLambdaFunctionArn:
-    Description: >
-      ARN of data transformation Lambda function. This optional parameter allows you to configure a Lambda function to be invoked by
-      Kinesis Firehose to transformation incoming events before they are saved to S3. For example, you could use this to remove sensitive
-      data to meet compliance regulations.
-    Type: String
-    Default: ''
-
-Conditions:
-  DataTransformationEnabled:
-    !Not [!Equals [!Ref DataTransformationLambdaFunctionArn, '']]
 
 Resources:
   Bucket:
@@ -107,14 +96,9 @@ Resources:
                 Resource:
                   - !GetAtt Bucket.Arn
                   - !Sub ${Bucket.Arn}/*
-              - !If
-                - DataTransformationEnabled
-                - Effect: Allow
-                  Action:
-                    - lambda:InvokeFunction
-                  Resource:
-                    - !Ref DataTransformationLambdaFunctionArn
-                - !Ref AWS::NoValue
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt DeliveryStreamProcessingFunction.Arn
 
   DeliveryStream:
     Type: AWS::KinesisFirehose::DeliveryStream
@@ -129,16 +113,14 @@ Resources:
           SizeInMBs: !Ref BufferingSizeInMBs
         CompressionFormat: !Ref CompressionFormat
         Prefix: "year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}"
-        ErrorOutputPrefix: "errors/!{firehose:error-output-type}/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}"
-        ProcessingConfiguration: !If
-          - DataTransformationEnabled
-          - Enabled: true
-            Processors:
-              - Type: Lambda
-                Parameters:
-                  - ParameterName: LambdaArn
-                    ParameterValue: !GetAtt DeliveryStreamProcessingFunction.Arn
-          - !Ref AWS::NoValue
+        ErrorOutputPrefix: "errors/!{firehose:error-output-type}/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+        ProcessingConfiguration:
+          Enabled: True
+          Processors:
+            - Type: Lambda
+              Parameters:
+                - ParameterName: LambdaArn
+                  ParameterValue: !GetAtt DeliveryStreamProcessingFunction.Arn
 
   EventToFirehoseFunctionRole:
     Type: AWS::IAM::Role

@@ -6,7 +6,7 @@ resolve_s3 = true
 s3_prefix = "back-end"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "BucketPrefix=\"cloud-resume-visitor-logs\" DeliveryStreamName=\"cloud-resume-visitor-log-stream\" CompressionFormat=\"UNCOMPRESSED\" EnableBucketEncryption=\"false\" BufferingIntervalInSeconds=\"300\" BufferingSizeInMBs=\"5\" DataTransformationLambdaFunctionArn=\"\""
+parameter_overrides = "BucketPrefix=\"cloud-resume-visitor-logs\" DeliveryStreamName=\"cloud-resume-visitor-log-stream\" CompressionFormat=\"UNCOMPRESSED\" EnableBucketEncryption=\"false\" BufferingIntervalInSeconds=\"300\" BufferingSizeInMBs=\"5\""
 image_repositories = []
 
 [default.global.parameters]
