@@ -11,10 +11,9 @@ def lambda_handler(event, context):
 		try:
 			entry = {
 				'id': payload['requestContext']['requestId'],
+				'epoch': payload['requestContext']['requestTimeEpoch'],
 				'source_ip': payload['requestContext']['identity'].get('sourceIp'),
 				'user_agent': payload['requestContext']['identity']['userAgent'],
-				'request_time': payload['requestContext']['requestTime'],
-				'epoch': payload['requestContext']['requestTimeEpoch'],
 			}
 
 			log = json.dumps(entry) + "\n"
