@@ -172,6 +172,7 @@ Resources:
         - AttributeName: epoch
           AttributeType: N
       TableName: !Ref DynamoTableName
+      BillingMode: PAY_PER_REQUEST
 
 Outputs:
   BucketName:
