@@ -61,7 +61,7 @@ Resources:
   DeliveryStreamProcessingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: transform_logs/
+      CodeUri: transform_log/
       Handler: app.lambda_handler
       Runtime: python3.14
       Architectures:
